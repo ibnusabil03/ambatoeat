@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int           @id @default(autoincrement())
+  email         String        @unique
+  name          String
+  password      String
+  phone         String?
+  role          Role          @default(USER)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  reservations  Reservation[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Table {
+  id             Int           @id @default(autoincrement())
+  tableNumber    Int           @unique
+  capacity       Int
+  status         TableStatus   @default(AVAILABLE)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  reservations   Reservation[]
+}
+
+enum TableStatus {
+  AVAILABLE
+  RESERVED
+  MAINTENANCE
+}
+
+model Reservation {
+  id              Int              @id @default(autoincrement())
+  userId          Int
+  tableId         Int
+  reservationDate DateTime
+  status          ReservationStatus @default(ACTIVE)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+  user            User             @relation(fields: [userId], references: [id])
+  table           Table            @relation(fields: [tableId], references: [id])
+}
+
+enum ReservationStatus {
+  ACTIVE
+  COMPLETED
+  CANCELED
+}
+
+model MenuItem {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String    @db.Text
+  price       Float
+  image       String?
+  category    Category
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum Category {
+  FOOD
+  DRINK
+  DESSERT
+}
+
+model Restaurant {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String   @db.Text
+  address     String
+  phone       String
+  email       String?
+  image       String?
+  ownerName   String?
+  ownerImage  String?
+  ownerQuote  String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Facility {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String   @db.Text
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
